@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+<title>GENESIS // 42 PLANES OF FIRST LIGHT</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    overflow: hidden;
+    cursor: none;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  #c {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    display: block;
+    background: #000;
+  }
+  #scan {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,0.20) 0px, rgba(0,0,0,0.20) 1px, transparent 1px, transparent 3px);
+    mix-blend-mode: multiply;
+  }
+  #vig {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(ellipse at 50% 50%, transparent 52%, rgba(0,0,0,0.24) 78%, rgba(0,0,0,0.62) 100%);
+  }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="scan"></div>
+<div id="vig"></div>
+<script>
+'use strict';
+/* ============================================================
+   GENESIS // 42 PLANES OF FIRST LIGHT
+   A zero-interface ASCII cosmogenesis. Every pixel of light is
+   a text character. 42 scenes, one procedural universe.
+   ============================================================ */
+
+/* ---------------- utils ---------------- */
+const TAU = Math.PI * 2;
+const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
+const ss01 = v => v <= 0 ? 0 : v >= 1 ? 1 : v * v * (3 - 2 * v);
+function h3(x, y, z) {
+  let n = ((x | 0) * 374761393 + (y | 0) * 668265263 + (z | 0) * 1440662683) | 0;
+  n = Math.imul(n ^ (n >>> 13), 1274126177);
+  n ^= n >>> 16;
+  return (n >>> 0) / 4294967296;
+}
+function hexRGB(h) { return [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)]; }
+function mixHex(h, w) {
+  const c = hexRGB(h);
+  const r = Math.round(c[0] + (255 - c[0]) * w), g = Math.round(c[1] + (255 - c[1]) * w), b = Math.round(c[2] + (255 - c[2]) * w);
+  return 'rgb(' + r + ',' + g + ',' + b + ')';
+}
+
+/* ---------------- palette ---------------- */
+const PALN = ['void','dim','dbl','blu','cyn','ice','wht','tea','pdp','prp','mag','pnk','mar','red','org','amb','gld','crm'];
+const PALV = {
+  void:'#151d38', dim:'#263657', dbl:'#2e4f9e', blu:'#4f83e8', cyn:'#83d9ff', ice:'#dcf2ff', wht:'#ffffff',
+  tea:'#52ecc9', pdp:'#33195e', prp:'#6f40cf', mag:'#b45ae4', pnk:'#ff74dc',
+  mar:'#6e1d3f', red:'#d93a36', org:'#ff7b2e', amb:'#ffb64d', gld:'#ffdf85', crm:'#fff4cc'
+};
+const PI = {};
+PALN.forEach((n, i) => PI[n] = i);
+const CORE = PALN.map(n => mixHex(PALV[n], 0.55));
+const FILL = PALN.map(n => { const c = hexRGB(PALV[n]); return 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')'; });
+
+/* color ramp sets: HOT -> WARM -> COOL PURPLE -> STELLAR BLUE (dithered morph) */
+const RS = [
+  [PI.mar, PI.red, PI.org, PI.amb, PI.gld, PI.crm, PI.wht],
+  [PI.pdp, PI.mar, PI.red, PI.org, PI.amb, PI.gld, PI.crm],
+  [PI.void, PI.pdp, PI.prp, PI.mag, PI.pnk, PI.ice, PI.wht],
+  [PI.void, PI.dbl, PI.blu, PI.cyn, PI.ice, PI.wht, PI.wht]
+];
+function pickCol(u, hue, heat, gx, gy) {
+  const rp = hue * (RS.length - 1);
+  const ri = Math.min(RS.length - 2, Math.floor(rp));
+  const set = RS[h3(gx, gy, 911) < (rp - ri) ? ri + 1 : ri];
+  let i = Math.floor(u * 4.4 + heat * 2.2);
+  if (i < 0) i = 0; if (i > 6) i = 6;
+  return set[i];
+}
+
+/* ---------------- charset + glyph atlas ---------------- */
+const CHS = ['·','.',':','-','=','+','*','#','%','@','█','▓','▒','░','/','\\','|','~','o','O','°'];
+const CI = {};
+CHS.forEach((c, i) => CI[c] = i);
+const RAMP = [CI['.'], CI['·'], CI[':'], CI['-'], CI['='], CI['+'], CI['*'], CI['#'], CI['%'], CI['@']];
+const rampChar = u => RAMP[Math.max(0, Math.min(9, Math.floor(u * 9.6)))];
+const DIR4 = [CI['-'], CI['\\'], CI['|'], CI['/']];
+const oppChar = c => c === CI['+'] ? CI['-'] : c === CI['-'] ? CI['+'] : c;
+
+const SP = 34, FS = 22;
+const S = [];
+(function buildAtlas() {
+  for (let ci = 0; ci < PALN.length; ci++) {
+    S[ci] = [];
+    for (let chi = 0; chi < CHS.length; chi++) {
+      const c = document.createElement('canvas');
+      c.width = c.height = SP;
+      const g = c.getContext('2d');
+      g.font = '700 ' + FS + 'px Menlo, Consolas, "Courier New", monospace';
+      g.textAlign = 'center';
+      g.textBaseline = 'middle';
+      g.shadowColor = PALV[PALN[ci]];
+      g.shadowBlur = 8;
+      g.fillStyle = PALV[PALN[ci]];
+      g.fillText(CHS[chi], SP / 2, SP / 2);
+      g.shadowBlur = 0;
+      g.fillStyle = CORE[ci];
+      g.fillText(CHS[chi], SP / 2, SP / 2);
+      S[ci][chi] = c;
+    }
+  }
+})();
+
+/* ---------------- canvas / grid ---------------- */
+const cvs = document.getElementById('c');
+const ctx = cvs.getContext('2d', { alpha: false });
+let W = 0, H = 0, GX = 0, GY = 0, CELL = 16, DS = 30, POF = 7, ASP = 1;
+let nxA = [], nyA = [];
+let cellScale = 1;
+function rebuildGrid() {
+  const base = Math.max(11, Math.round(Math.min(W / 120, H / 66)));
+  CELL = Math.round(base * cellScale);
+  GX = Math.ceil(W / CELL);
+  GY = Math.ceil(H / CELL);
+  ASP = W / H;
+  DS = CELL * 1.85;
+  POF = (DS - CELL) / 2;
+  nxA = new Array(GX); nyA = new Array(GY);
+  for (let gx = 0; gx < GX; gx++) nxA[gx] = (((gx + 0.5) / GX) * 2 - 1) * ASP;
+  for (let gy = 0; gy < GY; gy++) nyA[gy] = ((gy + 0.5) / GY) * 2 - 1;
+}
+function resize() {
+  W = window.innerWidth; H = window.innerHeight;
+  cvs.width = W; cvs.height = H;
+  rebuildGrid();
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, W, H);
+}
+window.addEventListener('resize', resize);
+resize();
+
+/* ---------------- 5x7 pixel font ---------------- */
+const F5 = {
+  'A':['01110','10001','10001','11111','10001','10001','10001'],
+  'B':['11110','10001','10001','11110','10001','10001','11110'],
+  'C':['01110','10001','10000','10000','10000','10001','01110'],
+  'D':['11110','10001','10001','10001','10001','10001','11110'],
+  'E':['11111','10000','10000','11110','10000','10000','11111'],
+  'F':['11111','10000','10000','11110','10000','10000','10000'],
+  'G':['01110','10001','10000','10111','10001','10001','01111'],
+  'H':['10001','10001','10001','11111','10001','10001','10001'],
+  'I':['11111','00100','00100','00100','00100','00100','11111'],
+  'J':['00111','00010','00010','00010','00010','10010','01100'],
+  'K':['10001','10010','10100','11000','10100','10010','10001'],
+  'L':['10000','10000','10000','10000','10000','10000','11111'],
+  'M':['10001','11011','10101','10101','10001','10001','10001'],
+  'N':['10001','11001','10101','10011','10001','10001','10001'],
+  'O':['01110','10001','10001','10001','10001','10001','01110'],
+  'P':['11110','10001','10001','11110','10000','10000','10000'],
+  'Q':['01110','10001','10001','10001','10101','10010','01101'],
+  'R':['11110','10001','10001','11110','10100','10010','10001'],
+  'S':['01111','10000','10000','01110','00001','00001','11110'],
+  'T':['11111','00100','00100','00100','00100','00100','00100'],
+  'U':['10001','10001','10001','10001','10001','10001','01110'],
+  'V':['10001','10001','10001','10001','10001','01010','00100'],
+  'W':['10001','10001','10001','10101','10101','11011','10001'],
+  'X':['10001','01010','00100','00100','00100','01010','10001'],
+  'Y':['10001','01010','00100','00100','00100','00100','00100'],
+  'Z':['11111','00001','00010','00100','01000','10000','11111'],
+  '0':['01110','10001','10011','10101','11001','10001','01110'],
+  '1':['00100','01100','00100','00100','00100','00100','01110'],
+  '2':['01110','10001','00001','00010','00100','01000','11111'],
+  '3':['11111','00010','00100','00010','00001','10001','01110'],
+  '4':['00010','00110','01010','10010','11111','00010','00010'],
+  '5':['11111','10000','11110','00001','00001','10001','01110'],
+  '6':['00110','01000','10000','11110','10001','10001','01110'],
+  '7':['11111','00001','00010','00100','01000','01000','01000'],
+  '8':['01110','10001','10001','01110','10001','10001','01110'],
+  '9':['01110','10001','10001','01111','00001','00010','01100'],
+  '.':['00000','00000','00000','00000','00000','01100','01100'],
+  '-':['00000','00000','00000','11111','00000','00000','00000'],
+  '=':['00000','00000','11111','00000','11111','00000','00000'],
+  '!':['00100','00100','00100','00100','00100','00000','00100'],
+  '+':['00000','00100','00100','11111','00100','00100','00000'],
+  '?':['01110','10001','00001','00010','00100','00000','00100']
+};
+
+/* ============================================================
+   THE 42 PLANES — state machine.
+   k: kernel | d: seconds | txt: narration | P: param overrides
+   ============================================================ */
+const DEF = {
+  dens:0, rate:1, pair:0, jit:0, ringW:10, spin:0, spokes:0, core:0,
+  exp:0.58, spd:0.8, w:0.045, cool:1.1, streak:0.8, fill:0.9, flow:0,
+  zoom:1, speed:0.8, heat:0.9, hue:0, cut:0.3, glow:0.8, grain:0.5,
+  exposure:1, shake:0, strobe:0, trail:0.38,
+  sparks:0, sparks2:0, atoms:0, stars:0, stellar:0, spulse:0
+};
+const KEYS = Object.keys(DEF).filter(k => typeof DEF[k] === 'number');
+
+const SC = [
+/* --- PLANE 1-5 : THE VOID & QUANTUM WHISPERS --- */
+{ n:'GENESIS',        d:4, k:'void',  txt:'IN THE BEGINNING',   P:{dens:0.0, exposure:0.5, trail:1},                    y:0.5,  c1:'dbl', c2:'ice', mc:'dim',  wp:'none', jit:0.06 },
+{ n:'NULL',           d:4, k:'void',  txt:'NOTHING',            P:{dens:0.02, rate:1.5, exposure:0.6, trail:0.9},       ts:1.35, c1:'dim', c2:'dbl', mc:'dim',  wp:'none', jit:0.05 },
+{ n:'NO SPACETIME',   d:4, k:'void',  txt:'NO SPACE. NO TIME.', P:{dens:0.05, rate:2.5, exposure:0.65, trail:0.85},     c1:'dim', c2:'blu', mc:'dim',  wp:'down', jit:0.08 },
+{ n:'ABSOLUTE ZERO',  d:4, k:'void',  txt:'ABSOLUTE ZERO',      P:{dens:0.1, rate:4, exposure:0.72, trail:0.8},         c1:'dbl', c2:'ice', mc:'dim',  wp:'down', jit:0.1 },
+{ n:'QUANTUM FOAM',   d:4, k:'foam',  txt:'QUANTUM FOAM',       P:{dens:0.55, pair:0.75, glow:0.9, rate:1.4, trail:0.6},c1:'tea', c2:'ice', mc:'dbl',  wp:'none', jit:0.16 },
+/* --- PLANE 6-10 : THE SINGULARITY --- */
+{ n:'THE SINGULARITY',d:4, k:'sing',  txt:'THE SINGULARITY',    P:{jit:0.2, core:0.55, shake:0.5, spin:1, spokes:0.4, glow:0.9, trail:0.42},  c1:'prp', c2:'ice', mc:'mag', wp:'in', jit:0.2 },
+{ n:'IT TREMBLES',    d:4, k:'sing',  txt:'IT TREMBLES',        P:{jit:0.45, shake:1.4, spin:2, spokes:0.7, core:0.65},  c1:'mag', c2:'ice', mc:'mag', wp:'in', jit:0.26 },
+{ n:'INFINITE DENSITY',d:4,k:'sing',  txt:'INFINITE DENSITY',   P:{jit:0.25, shake:1.8, core:0.8, spin:3, spokes:1},     c1:'blu', c2:'ice', mc:'mag', wp:'in', jit:0.2 },
+{ n:'INFINITE HEAT',  d:4, k:'sing',  txt:'INFINITE HEAT',      P:{jit:0.4, shake:2.6, core:1.05, heat:1.6, strobe:0.35},c1:'org', c2:'crm', mc:'red', wp:'in', jit:0.24 },
+{ n:'T = 0',          d:4, k:'sing',  txt:'T = 0',              P:{jit:0.6, shake:3.4, core:1.25, heat:2, strobe:0.9, exposure:1.15, glow:1.15, trail:0.34}, ts:1.4, c1:'wht', c2:'crm', mc:'red', wp:'in', jit:0.3 },
+/* --- PLANE 11-20 : THE BIG BANG --- */
+{ n:'IGNITION',       d:3, k:'bang',  txt:'IGNITION',           P:{spd:0.62, exp:0.55, w:0.03, cool:1.6, fill:0.55, heat:2, glow:1.25, trail:0.3, shake:2.5, exposure:1.3, sparks:0.9}, ts:1.25, c1:'wht', c2:'amb', mc:'org', wp:'out', jit:0.3 },
+{ n:'THE BIG BANG',   d:5, k:'bang',  txt:'THE BIG BANG',       P:{spd:0.8, exp:0.6, w:0.05, fill:0.9, heat:2, streak:0.9, sparks:1, shake:1.4, trail:0.34, exposure:1.25, glow:1.3}, ts:1.12, c1:'gld', c2:'wht', mc:'org', wp:'out', jit:0.26 },
+{ n:'INFLATION',      d:4, k:'bang',  txt:'INFLATION',          P:{spd:1.35, exp:0.68, w:0.06, cool:1.25, streak:1, fill:0.7, heat:1.8, sparks:0.8, shake:0.8}, ts:1.18, c1:'amb', c2:'wht', mc:'org', wp:'out', jit:0.22 },
+{ n:'SUPERLUMINAL',   d:4, k:'bang',  txt:'FASTER THAN LIGHT',  P:{spd:1.7, exp:0.72, cool:1.1, streak:1, fill:0.5, heat:1.6, sparks:0.6, trail:0.4}, c1:'amb', c2:'crm', mc:'org', wp:'out', jit:0.2 },
+{ n:'SPACE UNFOLDS',  d:4, k:'bang',  txt:'SPACE UNFOLDS',      P:{spd:1.15, exp:0.6, w:0.09, fill:0.6, heat:1.4, cool:0.95, trail:0.42, sparks:0.5, shake:0.4}, c1:'gld', c2:'crm', mc:'org', wp:'out', jit:0.18 },
+{ n:'TIME BEGINS',    d:4, k:'bang',  txt:'TIME BEGINS',        P:{spd:0.9, fill:0.7, heat:1.3, streak:0.7, flow:0.35, sparks:0.4, trail:0.45}, ts:1.1, c1:'gld', c2:'ice', mc:'org', wp:'out', jit:0.2 },
+{ n:'QUARK SOUP',     d:4, k:'bang',  txt:'QUARK-GLUON SOUP',   P:{spd:0.7, fill:0.95, heat:1.6, w:0.12, streak:0.4, flow:0.5, sparks:0.3, trail:0.5, glow:1.3}, c1:'org', c2:'wht', mc:'red', wp:'up', jit:0.2 },
+{ n:'SEA OF FIRE',    d:4, k:'plasma',txt:'A SEA OF FIRE',      P:{hue:0, heat:1.7, speed:1.35, spin:0.25, zoom:1.1, cut:0.2, glow:1.3, grain:0.7, exposure:1.15, trail:0.55, sparks:0.25}, c1:'amb', c2:'wht', mc:'red', wp:'up', jit:0.2 },
+{ n:'10 TRILLION K',  d:4, k:'plasma',txt:'10 TRILLION KELVIN', P:{heat:2, glow:1.45, exposure:1.25, cut:0.16, speed:1.5}, c1:'wht', c2:'gld', mc:'red', wp:'up', jit:0.22 },
+{ n:'MATTER WINS',    d:4, k:'plasma',txt:'MATTER WINS',        P:{heat:1.8, strobe:0.3, shake:0.6, sparks:0.5, glow:1.35}, c1:'gld', c2:'crm', mc:'red', wp:'up', jit:0.24 },
+/* --- PLANE 21-30 : THE PLASMA EPOCH --- */
+{ n:'PLASMA OCEAN',   d:5, k:'plasma',txt:'PLASMA OCEAN',       P:{heat:1.3, speed:0.9, spin:0.5, zoom:1.35, cut:0.24, glow:1.2, exposure:1.1}, c1:'org', c2:'crm', mc:'red', wp:'up', jit:0.16 },
+{ n:'TURBULENCE',     d:4, k:'plasma',txt:'TURBULENCE',         P:{spin:1.1, speed:1.25, grain:1, cut:0.26},              c1:'amb', c2:'wht', mc:'red', wp:'up', jit:0.22 },
+{ n:'PRIMORDIAL FIRE',d:4, k:'plasma',txt:'PRIMORDIAL FIRE',    P:{heat:1.6, glow:1.4, spin:0.7},                         c1:'gld', c2:'crm', mc:'red', wp:'up', jit:0.16 },
+{ n:'LIGHT TRAPPED',  d:4, k:'plasma',txt:'LIGHT TRAPPED',      P:{heat:1.5, cut:0.15, exposure:1.3, glow:1.25, shake:0.3}, c1:'amb', c2:'wht', mc:'org', wp:'up', jit:0.18 },
+{ n:'ALL GLOWS',      d:4, k:'plasma',txt:'THE UNIVERSE GLOWS', P:{heat:1.9, glow:1.5, exposure:1.35, spin:0.4, speed:1},  c1:'gld', c2:'wht', mc:'org', wp:'up', jit:0.14 },
+{ n:'SLOW COOLING',   d:5, k:'plasma',txt:'SLOW COOLING',       P:{heat:1.1, hue:0.2, glow:1.05, speed:0.7, cut:0.28, exposure:1.05, trail:0.6}, c1:'pnk', c2:'gld', mc:'prp', wp:'right', jit:0.12 },
+{ n:'3000 KELVIN',    d:4, k:'plasma',txt:'3000 KELVIN',        P:{heat:0.7, hue:0.33, glow:0.9, cut:0.3},                ts:1.2, c1:'pnk', c2:'ice', mc:'prp', wp:'right', jit:0.12 },
+{ n:'FOG THINS',      d:4, k:'plasma',txt:'THE FOG THINS',      P:{heat:0.5, hue:0.45, glow:0.75, cut:0.38, speed:0.55},  c1:'mag', c2:'ice', mc:'prp', wp:'right', jit:0.1 },
+{ n:'RECOMBINATION',  d:4, k:'plasma',txt:'RECOMBINATION',      P:{heat:0.55, hue:0.58, glow:0.85, cut:0.4, sparks2:1},   c1:'cyn', c2:'ice', mc:'prp', wp:'right', jit:0.16 },
+{ n:'PHOTONS ESCAPE', d:4, k:'plasma',txt:'PHOTONS ESCAPE',     P:{heat:0.6, hue:0.66, glow:0.7, cut:0.48, speed:0.4, strobe:0.2}, c1:'ice', c2:'wht', mc:'prp', wp:'out', jit:0.18 },
+/* --- PLANE 31-42 : COOLING, ATOMS, STELLAR NURSERY --- */
+{ n:'FIRST LIGHT',    d:5, k:'nebula',txt:'FIRST LIGHT',        P:{heat:0.4, hue:0.75, glow:0.5, cut:0.5, speed:0.25, zoom:1, exposure:0.85, stars:0.12, trail:0.65}, c1:'ice', c2:'cyn', mc:'prp', wp:'right', jit:0.1 },
+{ n:'DARK AGES',      d:4, k:'nebula',txt:'THE DARK AGES',      P:{glow:0.32, cut:0.55, stars:0.2, exposure:0.7, speed:0.2}, c1:'prp', c2:'dbl', mc:'void', wp:'none', jit:0.06 },
+{ n:'FIRST ATOMS',    d:5, k:'nebula',txt:'FIRST ATOMS',        P:{atoms:0.85, glow:0.42, stars:0.35, hue:0.8},           c1:'cyn', c2:'ice', mc:'dbl', wp:'none', jit:0.1 },
+{ n:'HYDROGEN',       d:4, k:'nebula',txt:'HYDROGEN',           P:{atoms:1, stars:0.45, glow:0.5},                        ts:1.25, c1:'cyn', c2:'blu', mc:'dbl', wp:'none', jit:0.1 },
+{ n:'GRAVITY',        d:4, k:'nebula',txt:'GRAVITY WHISPERS',   P:{spin:0.6, speed:0.3, stars:0.6, zoom:1.2},             c1:'prp', c2:'ice', mc:'dbl', wp:'in', jit:0.12 },
+{ n:'GAS CLOUDS',     d:5, k:'nebula',txt:'GAS CLOUDS',         P:{glow:0.6, hue:0.85, cut:0.45, stars:0.7, spin:0.35},   c1:'mag', c2:'ice', mc:'prp', wp:'right', jit:0.1 },
+{ n:'NEBULA',         d:4, k:'nebula',txt:'NEBULA',             P:{glow:0.72, speed:0.4, zoom:1.4, stars:0.8},            ts:1.3, c1:'mag', c2:'wht', mc:'prp', wp:'right', jit:0.12 },
+{ n:'THE COLLAPSE',   d:5, k:'nebula',txt:'THE COLLAPSE',       P:{spin:1.1, zoom:1.6, speed:0.55, glow:0.8, stars:0.88, atoms:0.5}, c1:'blu', c2:'wht', mc:'dbl', wp:'in', jit:0.14 },
+{ n:'PROTOSTAR',      d:4, k:'nebula',txt:'PROTOSTAR',          P:{stellar:0.55, spin:0.8, glow:0.85, stars:0.92},        c1:'amb', c2:'wht', mc:'org', wp:'in', jit:0.14 },
+{ n:'FUSION',         d:5, k:'nebula',txt:'FUSION',             P:{stellar:0.85, spulse:1, shake:0.5, glow:0.9, strobe:0.15}, ts:1.3, c1:'gld', c2:'crm', mc:'org', wp:'in', jit:0.2 },
+{ n:'A STAR IS BORN', d:5, k:'starbg',txt:'A STAR IS BORN',     P:{stellar:1, stars:1, glow:0.5, cut:0.5, speed:0.2, hue:1, shake:1.2, exposure:1.1, trail:0.6}, ts:1.12, c1:'gld', c2:'crm', mc:'org', wp:'out', jit:0.22 },
+{ n:'STARDUST',       d:8, k:'starbg',txt:'YOU ARE STARDUST',   P:{stellar:0.9, stars:1, glow:0.55, cut:0.5, speed:0.16, exposure:0.95, trail:0.7, shake:0}, ts:1.05, c1:'gld', c2:'ice', mc:'dbl', wp:'none', jit:0.08 }
+];
+/* precompute: merged params, start times, kernel fns */
+const KERN = {};
+let bangT0 = 0, recoT0 = 0, END = 0;
+(function prep() {
+  let acc = 0;
+  SC.forEach(s => {
+    s.t0 = acc; acc += s.d;
+    s.M = Object.assign({}, DEF, s.P);
+    s.fnName = s.k;
+  });
+  END = acc;
+  bangT0 = SC[10].t0;
+  recoT0 = SC[28].t0 + 0.9;
+})();
+
+/* ============================================================
+   KERNELS — procedural ASCII field generators.
+   out = {a:alpha, c:charIdx, col:palIdx, m:mirror}
+   ============================================================ */
+const OA = { a:0, c:0, col:0, m:0 }, OB = { a:0, c:0, col:0, m:0 };
+
+function kVoid(nx, ny, gx, gy, t, p, o) {
+  o.a = 0; o.m = 0;
+  const q = Math.floor(t * (0.6 + p.rate * 2));
+  const rr = h3(gx, gy, q);
+  if (rr < p.dens * 0.05) {
+    o.a = 0.15 + 0.6 * h3(gx, gy, q + 3);
+    o.col = h3(gx, gy, q + 5) < 0.85 ? PI.dim : PI.cyn;
+    o.c = h3(gx, gy, q + 7) < 0.6 ? CI['·'] : CI['.'];
+  } else {
+    const b = 0.011 * (0.5 + 0.5 * Math.sin(t * 0.5 + ny * 3 + nx));
+    if (b > 0.004) { o.a = b; o.col = PI.void; o.c = CI['·']; }
+  }
+}
+
+function kFoam(nx, ny, gx, gy, t, p, o) {
+  o.a = 0; o.m = 0;
+  const q = Math.floor(t * (5 + p.rate * 3));
+  const rr = h3(gx, gy, q);
+  if (rr < p.dens * 0.09) {
+    const u = h3(gx, gy, q + 11);
+    o.a = (0.25 + 0.75 * u) * p.glow;
+    o.col = u < 0.72 ? PI.tea : u < 0.92 ? PI.cyn : PI.ice;
+    o.c = rr < p.pair * 0.045 ? (u < 0.5 ? CI['+'] : CI['-'])
+        : u < 0.3 ? CI['.'] : u < 0.6 ? CI['·'] : u < 0.85 ? CI[':'] : CI['+'];
+    if (p.pair > 0.25 && rr < p.pair * 0.09) o.m = 1;
+  }
+}
+
+function kSing(nx, ny, gx, gy, t, p, o) {
+  o.a = 0; o.m = 0;
+  const q = Math.floor(t * 22);
+  nx += (h3(gx, gy, q) - 0.5) * p.jit * 0.06;
+  ny += (h3(gx, gy, q + 1) - 0.5) * p.jit * 0.06;
+  const r = Math.hypot(nx, ny) + 1e-5;
+  const ang = Math.atan2(ny, nx);
+  const fl = h3(gx, gy, q + 2);
+  const R0 = 0.14 + 0.015 * Math.sin(t * 7.3);
+  /* hyper-dense core : the shaking @ */
+  const c1 = 0.045 * p.core, c2 = 0.1 * p.core, c3 = 0.18 * p.core;
+  const hot = p.heat > 1.2;
+  if (r < c3 && c3 > 0.006) {
+    if (r < c1) { o.c = CI['@']; o.col = fl < 0.6 ? PI.wht : PI.crm; o.a = 1; }
+    else if (r < c2) { o.c = fl < 0.5 ? CI['#'] : CI['%']; o.col = hot ? (fl < 0.5 ? PI.gld : PI.amb) : (fl < 0.5 ? PI.ice : PI.cyn); o.a = 0.88; }
+    else { o.c = fl < 0.4 ? CI['*'] : CI['%']; o.col = hot ? (fl < 0.5 ? PI.org : PI.red) : (fl < 0.5 ? PI.mag : PI.pnk); o.a = 0.62; }
+    o.a *= 0.75 + 0.25 * fl;
+    return;
+  }
+  /* gravitational lensing rings + orbiting debris */
+  const band = Math.exp(-Math.pow((r - R0) * 14, 2));
+  const band2 = Math.exp(-Math.pow((r - R0 * 2 - 0.05) * 6, 2)) * (0.55 + 0.45 * Math.sin(ang * 9 - t * 3 * p.spin)) * p.spokes;
+  const ao = ang - t * (0.4 / (r * 3 + 0.1));
+  const db = h3(Math.floor(ao * 26 + 100), Math.floor(r * 24), 31);
+  const uu = band + band2 * 0.7 + (db < 0.12 ? 0.5 * (0.3 + 0.7 * db / 0.12) : 0) * Math.exp(-r * 1.4) + Math.exp(-r * 2.2) * 0.1;
+  if (uu < 0.045) return;
+  o.a = Math.min(1, uu) * p.glow;
+  o.col = r < R0 * 1.35 ? (uu > 0.7 ? PI.ice : PI.cyn) : (h3(gx, gy, 331) < 0.5 ? PI.prp : PI.mag);
+  o.c = rampChar(Math.min(1, uu));
+}
+
+function kBang(nx, ny, gx, gy, t, p, o) {
+  o.a = 0; o.m = 0;
+  const r = Math.hypot(nx, ny) + 1e-5;
+  const ang = Math.atan2(ny, nx) + p.flow * 0.15 * r;
+  const R = p.spd * Math.pow(p.age, p.exp);
+  const w = p.w;
+  const a2 = ((ang % TAU) + TAU) % TAU;
+  const sb = 0.45 + 0.55 * h3(Math.floor(a2 * 22), 5, Math.floor(t * 2.5));
+  const inside = Math.exp(-r * 2.2 * p.cool) * p.fill;
+  let sh = Math.exp(-Math.pow((r - R) / w, 2));
+  sh += 0.55 * Math.exp(-Math.pow((r - R * 0.62) / (w * 0.7), 2));
+  sh += 0.3 * Math.exp(-Math.pow((r - R * 0.4) / (w * 0.5), 2));
+  const shellE = sh * sb * p.streak + sh * 0.3;
+  const uu = Math.min(1, inside + shellE);
+  if (uu < 0.05) return;
+  o.a = uu * p.glow;
+  o.col = pickCol(uu, p.hue, p.heat, gx, gy);
+  o.c = shellE > inside ? DIR4[Math.round(a2 / (Math.PI / 4)) % 4] : rampChar(uu * 0.95);
+}
+
+function kPlasma(nx, ny, gx, gy, t, p, o) {
+  o.a = 0; o.m = 0;
+  const r = Math.hypot(nx, ny) + 1e-4;
+  const sw = p.spin * 0.55 / (r + 0.32) + p.flow;
+  const cs = Math.cos(sw), sn = Math.sin(sw);
+  const x = (nx * cs - ny * sn) * p.zoom;
+  const y = (nx * sn + ny * cs) * p.zoom;
+  const T = t * p.speed;
+  let v = Math.sin(x * 3.07 + T) + Math.sin(y * 2.71 - T * 1.31)
+        + Math.sin((x + y) * 2.33 + T * 0.71) + Math.sin(Math.hypot(x, y) * 4.17 - T * 1.63);
+  let u = v * 0.125 + 0.5;
+  u += (h3(gx + Math.floor(T * 3), gy, 17) - 0.5) * p.grain * 0.3;
+  u = clamp01(u);
+  if (u < p.cut) return;
+  const uu = (u - p.cut) / (1 - p.cut);
+  o.a = Math.pow(uu, 1.3) * p.glow;
+  o.c = rampChar(uu * 0.92);
+  o.col = pickCol(uu, p.hue, p.heat, gx, gy);
+}
+KERN.void = kVoid; KERN.foam = kFoam; KERN.sing = kSing;
+KERN.bang = kBang; KERN.plasma = kPlasma; KERN.nebula = kPlasma; KERN.starbg = kPlasma;
+
+/* ============================================================
+   SEQUENCER — lerps scene params, crossfades kernels
+   ============================================================ */
+const P2 = Object.assign({}, DEF);
+P2.fnA = kVoid; P2.fnB = kVoid; P2.mix = 1; P2.age = 0; P2.fq = 0; P2.t = 0; P2.lp = 0;
+let SI = 0;
+function seq(T) {
+  let i = SI;
+  while (i < SC.length - 1 && T >= SC[i + 1].t0) i++;
+  SI = i;
+  const s = SC[i], prev = i > 0 ? SC[i - 1] : s;
+  const lt = T - s.t0;
+  const tr = Math.min(s.d * 0.5, 1.4);
+  const m = lt >= tr ? 1 : ss01(lt / tr);
+  for (let k = 0; k < KEYS.length; k++) {
+    const key = KEYS[k];
+    P2[key] = prev.M[key] + (s.M[key] - prev.M[key]) * m;
+  }
+  P2.fnA = s.fnRef;
+  P2.fnB = prev.fnRef;
+  P2.mix = prev.fnRef === s.fnRef ? 1 : m;
+  P2.age = Math.max(0.001, T - bangT0);
+  P2.fq = (T * 24) | 0;
+  P2.t = T; P2.lp = lt;
+  return P2;
+}
+SC.forEach(s => s.fnRef = KERN[s.fnName]);
+
+/* ---------------- overlay particle pools ---------------- */
+const STR = [];   /* stars */
+for (let i = 0; i < 430; i++) {
+  let x = h3(i, 7, 3), y = h3(i, 13, 5);
+  if (i % 4 === 0) { x = 0.5 + (h3(i, 41, 6) - 0.5) * 0.42; y = 0.55 + (h3(i, 43, 8) - 0.5) * 0.4; }
+  else if (i % 4 === 1) { x = 0.22 + (h3(i, 47, 2) - 0.5) * 0.3; y = 0.3 + (h3(i, 53, 4) - 0.5) * 0.3; }
+  STR.push({ x, y, z: 0.25 + 0.75 * h3(i, 17, 9), ph: h3(i, 23, 2) * TAU, sp: h3(i, 29, 4), c: h3(i, 31, 7) });
+}
+const ATM = [];   /* atoms */
+for (let i = 0; i < 80; i++) {
+  ATM.push({ x: h3(i, 61, 3), y: h3(i, 67, 5), sd: 0.5 + h3(i, 71, 2), ph: h3(i, 73, 9) * TAU, w: (0.6 + h3(i, 79, 4) * 1.6), ne: h3(i, 83, 6) < 0.4 ? 1 : 2, gold: h3(i, 89, 8) < 0.3 });
+}
+const SPK = [];   /* explosion sparks */
+for (let i = 0; i < 240; i++) {
+  SPK.push({ era: i < 170 ? 0 : 1, ang: h3(i, 3, 7) * TAU, v: 0.5 + h3(i, 5, 9) * 1.5, life: h3(i, 11, 2), cs: h3(i, 13, 4) });
+}
+
+function drawStars(p, t) {
+  const n = Math.floor(430 * clamp01(p.stars * 1.05));
+  for (let i = 0; i < n; i++) {
+    const s = STR[i];
+    const tw = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(t * (0.6 + s.sp * 2.6) + s.ph));
+    const a = tw * (0.25 + 0.75 * s.z) * Math.min(1, p.stars * 1.2);
+    if (a < 0.04) continue;
+    const x = ((s.x + t * 0.0032 * s.z) % 1) * W;
+    const y = s.y * H;
+    const big = s.z > 0.8;
+    const ch = big ? (tw > 0.8 ? CI['*'] : CI['+']) : s.z > 0.55 ? CI['·'] : CI['.'];
+    const col = s.c < 0.7 ? PI.wht : s.c < 0.85 ? PI.ice : s.c < 0.95 ? PI.cyn : PI.pnk;
+    ctx.globalAlpha = a;
+    ctx.drawImage(S[col][ch], x - DS * 0.5, y - DS * 0.5, DS, DS);
+  }
+}
+function drawAtoms(p, t) {
+  const n = Math.floor(80 * clamp01(p.atoms));
+  for (let i = 0; i < n; i++) {
+    const at = ATM[i];
+    const af = Math.min(1, (p.atoms * 80 - i) / 8 + 0.3);
+    const cx = (at.x + Math.sin(t * 0.3 * at.sd + at.ph) * 0.02) * W;
+    const cy = (at.y + Math.cos(t * 0.24 * at.sd + at.ph) * 0.018) * H;
+    const nc = at.gold ? PI.gld : PI.cyn;
+    ctx.globalAlpha = 0.85 * af;
+    ctx.drawImage(S[nc][CI['o']], cx - DS * 0.55, cy - DS * 0.55, DS * 1.1, DS * 1.1);
+    for (let e = 0; e < at.ne; e++) {
+      const rr = CELL * (1.7 + e * 1.0);
+      const dir = e % 2 === 0 ? 1 : -1;
+      for (let d = 0; d < 5; d++) {
+        const aa = at.ph + d / 5 * TAU + t * 0.1 * dir;
+        ctx.globalAlpha = 0.1 * af;
+        ctx.drawImage(S[PI.blu][CI['·']], cx + Math.cos(aa) * rr - DS * 0.25, cy + Math.sin(aa) * rr * 0.8 - DS * 0.25, DS * 0.5, DS * 0.5);
+      }
+      const ea = t * at.w * dir + at.ph + e * 2.1;
+      ctx.globalAlpha = 0.75 * af;
+      ctx.drawImage(S[PI.ice][CI['·']], cx + Math.cos(ea) * rr - DS * 0.3, cy + Math.sin(ea) * rr * 0.8 - DS * 0.3, DS * 0.6, DS * 0.6);
+    }
+  }
+}
+function drawSparks(p, t) {
+  if (p.sparks > 0.02) {
+    const age = t - bangT0;
+    for (let i = 0; i < 170; i++) {
+      const s = SPK[i];
+      const life = 9 + s.life * 15;
+      if (age < 0 || age > life) continue;
+      const r = s.v * 2.7 * (1 - Math.exp(-age / 1.9)) * Math.min(W, H) * 0.5;
+      const px = W / 2 + Math.cos(s.ang) * r, py = H / 2 + Math.sin(s.ang) * r;
+      const a = (1 - age / life) * p.sparks;
+      if (a < 0.03) continue;
+      const col = RS[0][Math.max(0, Math.min(6, Math.floor(a * 4.4 + 1.2)))];
+      ctx.globalAlpha = a * 0.9;
+      ctx.drawImage(S[col][DIR4[Math.round((((s.ang % TAU) + TAU) % TAU) / (Math.PI / 4)) % 4]], px - DS * 0.5, py - DS * 0.5, DS, DS);
+    }
+  }
+  if (p.sparks2 > 0.02) {
+    const age = t - recoT0;
+    for (let i = 170; i < 240; i++) {
+      const s = SPK[i];
+      const life = 4 + s.life * 4;
+      if (age < 0 || age > life) continue;
+      const r = s.v * 3.4 * (1 - Math.exp(-age / 0.8)) * Math.min(W, H) * 0.5;
+      const px = W / 2 + Math.cos(s.ang) * r, py = H / 2 + Math.sin(s.ang) * r;
+      const a = (1 - age / life) * p.sparks2;
+      if (a < 0.03) continue;
+      const col = s.cs < 0.5 ? PI.cyn : s.cs < 0.8 ? PI.ice : PI.wht;
+      ctx.globalAlpha = a;
+      ctx.drawImage(S[col][s.cs < 0.3 ? CI['*'] : CI['·']], px - DS * 0.45, py - DS * 0.45, DS * 0.9, DS * 0.9);
+    }
+  }
+}
+function drawStellar(p, t) {
+  const st = p.stellar;
+  if (st <= 0.01) return;
+  const px = W * 0.5, py = H * 0.55;
+  const pulse = 1 + 0.06 * Math.sin(t * 5.1) + (p.spulse ? 0.22 * Math.sin(t * 2.3) * p.spulse : 0);
+  const R = CELL * (1.4 + 2.6 * st) * pulse;
+  ctx.globalAlpha = Math.min(1, st * 1.3);
+  ctx.drawImage(S[PI.wht][CI['@']], px - R * 0.92, py - R * 0.92, R * 1.84, R * 1.84);
+  ctx.globalAlpha = 0.35 * st;
+  ctx.drawImage(S[PI.gld][CI['O']], px - R * 1.4, py - R * 1.4, R * 2.8, R * 2.8);
+  const rq = (t * 3) | 0;
+  for (let i = 0; i < 16; i++) {
+    const an = i / 16 * TAU + 0.1 * Math.sin(t * 0.7);
+    const rr = R * (2.0 + 0.5 * h3(i, rq, 5));
+    const a = 0.55 * st * (0.4 + 0.6 * h3(i, rq, 9));
+    if (a < 0.05) continue;
+    ctx.globalAlpha = a;
+    ctx.drawImage(S[h3(i, rq, 3) < 0.5 ? PI.gld : PI.crm][i % 2 ? CI['·'] : CI['°']], px + Math.cos(an) * rr - DS * 0.35, py + Math.sin(an) * rr - DS * 0.35, DS * 0.7, DS * 0.7);
+  }
+}
+
+/* ============================================================
+   NARRATION — massive pixel-font block text that assembles,
+   glitches, melts, and is blown away by cosmic winds.
+   ============================================================ */
+const TXT = [];
+function spawnText(spec, T) {
+  const str = spec.txt;
+  let cols = 0;
+  for (const ch of str) cols += (F5[ch] ? 6 : 4);
+  cols -= 1;
+  let k = Math.min(W * 0.9 / cols, H * 0.16) * (spec.ts || 1);
+  k = Math.min(k, 34);
+  const px0 = (W - cols * k) / 2;
+  const py0 = H * (spec.y || 0.5) - 3.5 * k;
+  const parts = [];
+  let cx = 0, idx = 0;
+  for (const ch of str) {
+    const g = F5[ch];
+    if (g) {
+      for (let r = 0; r < 7; r++) {
+        const row = g[r];
+        for (let c = 0; c < 5; c++) {
+          if (row.charCodeAt(c) === 49) {
+            parts.push({
+              x: px0 + (cx + c) * k, y: py0 + r * k,
+              sx: (h3(idx, 7, 1) - 0.5) * 200, sy: (h3(idx, 3, 9) - 0.5) * 200,
+              fr: r / 6, rf: h3(idx, 11, 4), i: idx
+            });
+            idx++;
+          }
+        }
+      }
+      cx += 6;
+    } else cx += 4;
+  }
+  TXT.push({ spec, parts, born: T, dur: Math.max(1.9, Math.min(spec.d * 0.78, 4.4)), k });
+}
+function windVec(m, x, y) {
+  switch (m) {
+    case 'up': return [0.15, -1];
+    case 'down': return [0, 0.7];
+    case 'right': return [1, -0.15];
+    case 'out': { const dx = (x - W / 2) / H, dy = (y - H / 2) / H, l = Math.hypot(dx, dy) + 1e-3; return [dx / l * 1.3, dy / l * 1.3]; }
+    case 'in': { const dx = (W / 2 - x) / H, dy = (H / 2 - y) / H, l = Math.hypot(dx, dy) + 1e-3; return [dx / l * 1.6, dy / l * 1.6]; }
+    default: return [0.04, -0.04];
+  }
+}
+function drawTexts(t) {
+  for (let gi = TXT.length - 1; gi >= 0; gi--) {
+    const G = TXT[gi];
+    const lt = t - G.born;
+    if (lt > G.dur) { TXT.splice(gi, 1); continue; }
+    const pr = lt / G.dur;
+    const ein = ss01(Math.min(1, lt / (G.dur * 0.14)));
+    const mp = clamp01((pr - 0.62) / 0.32);
+    const asmb = 1 - ein;
+    const tq = (t * 22) | 0;
+    const push = 1 + 0.07 * pr;
+    const cxS = W / 2, cyS = H * (G.spec.y || 0.5);
+    const sz = G.k * 1.62;
+    const c1i = PI[G.spec.c1], c2i = PI[G.spec.c2], mci = PI[G.spec.mc];
+    const jit = G.spec.jit || 0.12;
+    const split = jit > 0.21 && mp <= 0.02;
+    for (let pi = 0; pi < G.parts.length; pi++) {
+      const p = G.parts[pi];
+      let x = p.x + p.sx * asmb, y = p.y + p.sy * asmb;
+      const fl = 1 - mp;
+      x += Math.sin(t * 1.7 + p.rf * 40) * 1.2 * fl * G.k * 0.09;
+      y += Math.cos(t * 1.3 + p.rf * 31) * 1.1 * fl * G.k * 0.08;
+      if (h3(p.i, tq, gi * 131) < jit * 0.5) x += (h3(p.i, tq, 17) - 0.5) * G.k * 3.2;
+      if (mp > 0) {
+        const wv = windVec(G.spec.wp, x, y);
+        const e = mp * mp;
+        x += wv[0] * e * G.k * 7 + Math.sin(t * 3 + p.rf * 50) * G.k * mp;
+        y += wv[1] * e * G.k * 7;
+      }
+      x = cxS + (x - cxS) * push;
+      y = cyS + (y - cyS) * push;
+      let chi = CI['█'];
+      if (mp > 0) {
+        const dg = clamp01(mp * 1.4 - p.rf * 0.5);
+        chi = dg > 0.75 ? CI['░'] : dg > 0.5 ? CI['▒'] : dg > 0.25 ? CI['▓'] : CI['█'];
+      }
+      let a = (0.25 + 0.75 * ein) * (mp > 0 ? Math.pow(1 - mp, 1.5) : 1);
+      a *= 0.92 + 0.08 * Math.sin(t * 13 + p.rf * 20);
+      if (a < 0.03) continue;
+      let col = p.rf < p.fr ? c2i : c1i;
+      if (mp > 0.35 && h3(p.i, 5, gi) < (mp - 0.35) * 1.4) col = mci;
+      ctx.globalAlpha = a;
+      ctx.drawImage(S[col][chi], x - sz * 0.15, y - sz * 0.15, sz, sz);
+      if (split) {
+        const oc = p.i % 2 === 0 ? PI.cyn : PI.pnk;
+        ctx.globalAlpha = a * 0.3;
+        ctx.drawImage(S[oc][chi], x - sz * 0.15 + G.k * 0.7, y - sz * 0.15, sz, sz);
+        ctx.drawImage(S[oc][chi], x - sz * 0.15 - G.k * 0.7, y - sz * 0.15, sz, sz);
+      }
+    }
+  }
+}
+
+/* ============================================================
+   EVENTS — text triggers + cosmic flashes
+   ============================================================ */
+const EV = [];
+SC.forEach((s, i) => EV.push({ t: s.t0 + Math.min(0.9, s.d * 0.18), k: 'txt', s }));
+const FLASHES = [
+  [11, 0, 'wht', 1.0], [12, 0, 'crm', 0.5], [13, 0, 'amb', 0.25], [18, 0, 'org', 0.28],
+  [29, 0.9, 'cyn', 0.5], [30, 0, 'ice', 0.4], [31, 0.4, 'ice', 0.42], [40, 4.2, 'amb', 0.35], [41, 0, 'gld', 1.0]
+];
+FLASHES.forEach(f => EV.push({ t: SC[f[0] - 1].t0 + f[1], k: 'fl', c: PI[f[2]], p: f[3] }));
+EV.sort((a, b) => a.t - b.t);
+let evp = 0;
+let FPOW = 0, FCI = PI.wht;
+
+/* ---------------- master clock / ignition ---------------- */
+let running = false, startT = 0;
+function clock() { return performance.now() * 0.001 - startT; }
+function ignite() {
+  if (!running) {
+    running = true;
+    startT = performance.now() * 0.001;
+  } else if (clock() > END + 5) {
+    /* hidden encore: click after the finale replays the creation */
+    startT = performance.now() * 0.001;
+    evp = 0; TXT.length = 0; SI = 0; FPOW = 0;
+  }
+}
+window.addEventListener('pointerdown', ignite);
+window.addEventListener('keydown', ignite);
+setTimeout(ignite, 900); /* auto-ignition (no audio policies here) */
+
+/* ---------------- adaptive quality ---------------- */
+let ema = 16.7, fcheck = 0;
+function adapt(dt) {
+  ema = ema * 0.95 + dt * 1000 * 0.05;
+  fcheck += dt;
+  if (fcheck > 3) {
+    fcheck = 0;
+    if (ema > 26 && cellScale < 2.2) { cellScale += 0.3; rebuildGrid(); }
+    else if (ema < 14 && cellScale > 1) { cellScale = Math.max(1, cellScale - 0.15); rebuildGrid(); }
+  }
+}
+
+/* ---------------- main render loop ---------------- */
+let last = 0;
+function frame(now) {
+  requestAnimationFrame(frame);
+  if (!last) last = now;
+  let dt = (now - last) / 1000;
+  last = now;
+  if (dt > 0.05) dt = 0.05;
+  adapt(dt);
+  if (!running) return;
+  const T = clock();
+  const p = seq(T);
+  /* fire scheduled events */
+  while (evp < EV.length && EV[evp].t <= T) {
+    const e = EV[evp++];
+    if (e.k === 'txt') spawnText(e.s, T);
+    else { if (e.p > FPOW) { FPOW = e.p; FCI = e.c; } }
+  }
+  /* clear with motion trails */
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = 'rgba(0,0,0,' + clamp01(p.trail).toFixed(3) + ')';
+  ctx.fillRect(0, 0, W, H);
+  /* screen shake */
+  const shx = (h3(p.fq, 1, 3) - 0.5) * (p.shake * 3 + FPOW * 9);
+  const shy = (h3(p.fq, 2, 5) - 0.5) * (p.shake * 3 + FPOW * 9);
+  ctx.save();
+  ctx.translate(shx, shy);
+  ctx.globalCompositeOperation = 'lighter';
+  /* ---- the ASCII field ---- */
+  const exposure = p.exposure * (1 + p.strobe * (h3(p.fq, 7, 3) - 0.5) * 0.9);
+  const fA = p.fnA, fB = p.fnB, mixw = p.mix;
+  for (let gy = 0; gy < GY; gy++) {
+    const ny = nyA[gy];
+    const py = gy * CELL;
+    for (let gx = 0; gx < GX; gx++) {
+      const nx = nxA[gx];
+      if (mixw >= 1) {
+        fA(nx, ny, gx, gy, T, p, OA);
+      } else {
+        fA(nx, ny, gx, gy, T, p, OA);
+        fB(nx, ny, gx, gy, T, p, OB);
+        const wa = mixw, wb = 1 - mixw;
+        if (OB.a * wb > OA.a * wa) { OA.c = OB.c; OA.col = OB.col; }
+        OA.a = OA.a * wa + OB.a * wb;
+        OA.m = OA.m || OB.m;
+      }
+      const a = OA.a * exposure;
+      if (a <= 0.025) continue;
+      const px = gx * CELL;
+      ctx.globalAlpha = a > 1 ? 1 : a;
+      ctx.drawImage(S[OA.col][OA.c], px - POF, py - POF, DS, DS);
+      if (OA.m) {
+        ctx.globalAlpha = a * 0.5;
+        ctx.drawImage(S[OA.col][oppChar(OA.c)], (GX - 1 - gx) * CELL - POF, (GY - 1 - gy) * CELL - POF, DS, DS);
+      }
+    }
+  }
+  /* ---- overlays ---- */
+  drawSparks(p, T);
+  drawAtoms(p, T);
+  drawStars(p, T);
+  drawStellar(p, T);
+  drawTexts(T);
+  ctx.restore();
+  /* ---- ignition flashes ---- */
+  if (FPOW > 0.012) {
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = FPOW * 0.85;
+    ctx.fillStyle = FILL[FCI];
+    ctx.fillRect(0, 0, W, H);
+  }
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.globalAlpha = 1;
+  FPOW *= Math.exp(-dt * 3.6);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
