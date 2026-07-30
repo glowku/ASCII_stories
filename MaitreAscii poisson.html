@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-black text-neutral-100">
+<html lang="fr" class="h-full bg-black text-neutral-100">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Abyssos: 12 Pure Parametric Math Organisms</title>
+  <title>Abyssos: Parametric Organisms & ASCII Engine</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,7 +28,7 @@
     <div class="flex items-center space-x-3">
       <div class="h-2 w-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_#22d3ee]"></div>
       <h1 class="text-xs font-semibold tracking-wider bg-gradient-to-r from-cyan-400 via-teal-300 to-indigo-400 bg-clip-text text-transparent uppercase font-mono">
-        Abyssos : 12 Pure Parametric Math Organisms
+        Abyssos : Pure Parametric Organisms
       </h1>
     </div>
     <div class="flex items-center space-x-2.5 text-[11px] font-mono text-neutral-400">
@@ -42,19 +42,19 @@
 
     <aside class="w-full lg:w-96 border-b lg:border-b-0 lg:border-r border-neutral-900 bg-black/90 backdrop-blur-xl p-4 flex flex-col space-y-4 overflow-y-auto shrink-0 z-10">
       
-      <!-- Math Poetics -->
+      <!-- Equations Header -->
       <div class="space-y-1">
         <h2 class="text-[10px] uppercase tracking-widest text-cyan-400 font-semibold font-mono">Continuous Field Equations</h2>
         <p class="text-[11px] text-neutral-400 leading-relaxed italic border-l-2 border-cyan-500/40 pl-2.5 py-0.5">
-          "No piecewise shortcuts, no split branches. Every organism is a single continuous differential equation of cos, sin, hypot."
+          "No piecewise shortcuts, single continuous differential equations."
         </p>
       </div>
 
       <!-- Presets Selection -->
       <div class="space-y-1">
         <label class="text-[11px] font-medium text-neutral-300 flex items-center justify-between font-mono">
-          <span>Species Selection (12 Organisms)</span>
-          <span class="text-[10px] text-cyan-400">Pure Golfed Formula</span>
+          <span>Species Selection</span>
+          <span class="text-[10px] text-cyan-400">Golfed Formula</span>
         </label>
         <select id="preset-select" class="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-2.5 py-1.5 text-xs text-neutral-200 focus:outline-none focus:border-cyan-500 font-mono transition-colors cursor-pointer">
           <option value="tsubuyaki">1. Aurelia つぶやき (Master's Original Tweet)</option>
@@ -75,8 +75,8 @@
       <!-- Formula Display -->
       <div class="space-y-1 bg-neutral-950 border border-neutral-900 rounded-xl p-2.5 box-glow">
         <div class="flex items-center justify-between">
-          <span class="text-[10px] font-mono font-medium text-indigo-300">Monolithic Differential Formula</span>
-          <span id="formula-tag" class="text-[9px] text-neutral-500 font-mono">Single Golfed Function</span>
+          <span class="text-[10px] font-mono font-medium text-indigo-300">Monolithic Formula</span>
+          <span id="formula-tag" class="text-[9px] text-neutral-500 font-mono">Golfed Function</span>
         </div>
         <div id="equation-text" class="text-[10px] font-mono text-cyan-300/90 break-all leading-relaxed bg-black/90 p-2 rounded border border-neutral-900 select-text max-h-28 overflow-y-auto">
           a=(y,d=mag(k=((y&lt;9?9:5)+cos(y*31-t))*cos(i/44),e=y/9-14)/1.6)=&gt;px=(d*9+k*k)*cos(c=d-t/2); py=(55+d*9)*sin(c/3)+4*sin(k*2)+(y/29)*k*(e+3*sin(e*4-d*4+t*3))
@@ -104,7 +104,7 @@
         <!-- Temporal Speed -->
         <div class="space-y-1">
           <div class="flex justify-between text-xs font-mono">
-            <span class="text-neutral-400">Temporal Speed (&omega;)</span>
+            <span class="text-neutral-400">Speed (&omega;)</span>
             <span id="val-speed" class="text-cyan-400">1.0x</span>
           </div>
           <input type="range" id="param-speed" min="0.1" max="3.0" step="0.05" value="1.0" class="w-full accent-cyan-400 bg-neutral-900 h-1.5 rounded-lg appearance-none cursor-pointer">
@@ -113,7 +113,7 @@
         <!-- Harmonics -->
         <div class="space-y-1">
           <div class="flex justify-between text-xs font-mono">
-            <span class="text-neutral-400">Harmonic Multiplier (h)</span>
+            <span class="text-neutral-400">Harmonics (h)</span>
             <span id="val-harmonics" class="text-cyan-400">31</span>
           </div>
           <input type="range" id="param-harmonics" min="5" max="80" step="1" value="31" class="w-full accent-cyan-400 bg-neutral-900 h-1.5 rounded-lg appearance-none cursor-pointer">
@@ -122,26 +122,26 @@
         <!-- Density -->
         <div class="space-y-1">
           <div class="flex justify-between text-xs font-mono">
-            <span class="text-neutral-400">Particle Resolution (N)</span>
+            <span class="text-neutral-400">Resolution (N)</span>
             <span id="val-density" class="text-cyan-400">12,000</span>
           </div>
           <input type="range" id="param-density" min="3000" max="25000" step="1000" value="12000" class="w-full accent-cyan-400 bg-neutral-900 h-1.5 rounded-lg appearance-none cursor-pointer">
         </div>
       </div>
 
-      <!-- Diffuse Palette Selection -->
+      <!-- Color Palette Selection -->
       <div class="space-y-1.5 pt-2 border-t border-neutral-900">
         <label class="text-xs font-medium text-neutral-300 font-mono flex justify-between">
           <span>Continuous Nodal Palette</span>
-          <span class="text-[10px] text-amber-400">Scalar Interpolation</span>
+          <span class="text-[10px] text-amber-400">Interpolation</span>
         </label>
         <select id="theme-select" class="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-2.5 py-1.5 text-xs text-neutral-200 focus:outline-none focus:border-amber-500 font-mono transition-colors cursor-pointer">
-          <option value="thermal">1. Thermal Tension (Yellow-Amber-Crimson-Violet)</option>
-          <option value="abyssal">2. Deep Bioluminescent (Pearl-Cyan-Cobalt-Indigo)</option>
-          <option value="emerald">3. Quantum Emerald (Solar Lime-Mint-Deep Teal)</option>
-          <option value="solar">4. Plasma Solar (Gold Flare-Magenta-Crimson)</option>
-          <option value="monochrome">5. Silver Phantom (Liquid Diamond-Steel Chrome)</option>
-          <option value="coral">6. Neon Coral Reef (Solar Gold-Magenta-Coral Red)</option>
+          <option value="thermal">1. Thermal Tension (Yellow-Amber-Violet)</option>
+          <option value="abyssal">2. Deep Bioluminescent (Cyan-Cobalt-Indigo)</option>
+          <option value="emerald">3. Quantum Emerald (Mint-Teal-Deep)</option>
+          <option value="solar">4. Plasma Solar (Gold Flare-Magenta)</option>
+          <option value="monochrome">5. Silver Phantom (Liquid Chrome)</option>
+          <option value="coral">6. Neon Coral Reef (Gold-Magenta-Coral)</option>
         </select>
       </div>
 
@@ -161,20 +161,39 @@
         </div>
       </div>
 
-      <!-- Video Recorder Button -->
-      <div class="pt-2 border-t border-neutral-900 space-y-1.5">
+      <!-- Video Recorder Settings & Button -->
+      <div class="pt-2 border-t border-neutral-900 space-y-2">
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-[10px] font-mono text-neutral-400 block mb-0.5">Format</label>
+            <select id="record-format" class="w-full bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-[11px] font-mono text-neutral-300 focus:outline-none focus:border-red-500">
+              <option value="mp4">MP4 (H.264)</option>
+              <option value="webm-vp9" selected>WebM (VP9)</option>
+              <option value="webm-vp8">WebM (VP8)</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-[10px] font-mono text-neutral-400 block mb-0.5">Bitrate / Qualité</label>
+            <select id="record-bitrate" class="w-full bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-[11px] font-mono text-neutral-300 focus:outline-none focus:border-red-500">
+              <option value="8000000">Élevée (8 Mbps)</option>
+              <option value="4000000" selected>Moyenne (4 Mbps)</option>
+              <option value="2000000">Basse (2 Mbps)</option>
+            </select>
+          </div>
+        </div>
+
         <button id="btn-record" class="w-full py-2 px-3 rounded-lg text-xs font-mono font-semibold border border-red-500/40 bg-red-950/20 text-red-300 hover:bg-red-900/40 flex items-center justify-center space-x-2 transition-all">
           <span id="record-dot" class="h-2 w-2 rounded-full bg-red-500"></span>
-          <span id="record-text">Record Video (MP4/WebM)</span>
+          <span id="record-text">Enregistrer la vidéo</span>
         </button>
-        <p id="record-status" class="text-[9px] font-mono text-center text-neutral-500">Ready to record animation export</p>
+        <p id="record-status" class="text-[9px] font-mono text-center text-neutral-500">Prêt pour l'exportation vidéo</p>
       </div>
 
-      <!-- Audio Synthesizer -->
+      <!-- Enhanced Bio-Reactive Audio Synthesizer -->
       <div class="pt-1">
         <button id="audio-toggle" class="w-full py-2 px-3 rounded-lg text-xs font-mono border border-neutral-800 bg-neutral-950 text-neutral-300 hover:bg-neutral-900 hover:text-cyan-300 flex items-center justify-center space-x-2 transition-all">
           <svg id="audio-icon" class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
-          <span id="audio-text">Enable Low Drone Synthesizer</span>
+          <span id="audio-text">Activer Synthétiseur Ambient Bio-Évolutif</span>
         </button>
       </div>
 
@@ -184,15 +203,18 @@
       
       <div class="absolute top-3 right-4 z-20 pointer-events-none text-right hidden sm:block">
         <p class="text-[11px] font-mono text-cyan-400 glow-cyan">High-Precision Field Viewport</p>
-        <p class="text-[9px] text-neutral-500 font-mono">Wheel / Touch Pinch to Zoom | Drag to Pan</p>
+        <p class="text-[9px] text-neutral-500 font-mono">Molette / Pincement pour Zoom | Glisser pour déplacer</p>
       </div>
 
-      <!-- Canvas Engine Viewport -->
-      <canvas id="creature-canvas" class="w-full h-full max-w-[900px] max-h-[900px] object-contain rounded-xl border border-neutral-900 bg-black shadow-2xl cursor-grab active:cursor-grabbing transition-opacity duration-300"></canvas>
+      <!-- Conteneur Carré Uniforme pour tous les modes -->
+      <div id="display-container" class="relative w-full h-full max-w-[85vh] max-h-[85vh] aspect-square rounded-xl border border-neutral-900 bg-black shadow-2xl overflow-hidden flex items-center justify-center cursor-grab active:cursor-grabbing">
+        <!-- Canvas Engine Viewport -->
+        <canvas id="creature-canvas" class="w-full h-full block object-contain"></canvas>
 
-      <!-- ASCII Rendering Viewport -->
-      <div id="ascii-container" class="hidden absolute inset-0 p-2 flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing">
-        <pre id="ascii-viewport" class="font-mono text-[8px] sm:text-[10px] leading-[0.82] tracking-tighter text-amber-400 select-none text-center whitespace-pre glow-amber"></pre>
+        <!-- ASCII Rendering Viewport (Optimisé pour occuper tout l'espace sans ligne parasite) -->
+        <div id="ascii-container" class="hidden absolute inset-0 w-full h-full flex items-center justify-center overflow-hidden bg-black">
+          <pre id="ascii-viewport" class="font-mono leading-[1] tracking-normal select-none text-center whitespace-pre block overflow-hidden font-bold m-0 p-0"></pre>
+        </div>
       </div>
 
     </main>
@@ -217,14 +239,18 @@
       isRecording: false,
       mediaRecorder: null,
       recordedChunks: [],
-      recordStartTime: 0
+      recordStartTime: 0,
+      motionEnergy: 0
     };
 
     const canvas = document.getElementById('creature-canvas');
     const ctx = canvas.getContext('2d', { alpha: false });
     const asciiViewport = document.getElementById('ascii-viewport');
     const asciiContainer = document.getElementById('ascii-container');
-    const viewportMain = document.getElementById('viewport-main');
+    const displayContainer = document.getElementById('display-container');
+
+    const captureCanvas = document.createElement('canvas');
+    const captureCtx = captureCanvas.getContext('2d', { alpha: false });
 
     const paramZoom = document.getElementById('param-zoom');
     const valZoom = document.getElementById('val-zoom');
@@ -246,6 +272,7 @@
     const presets = {
       tsubuyaki: {
         tag: "Processing Compact Master Golfed Math",
+        audio: { baseFreq: 55, wave: 'sine', modRatio: 1.5, type: 'medusa' },
         formula: "a=(y,d=mag(k=((y<9?9:5)+cos(y*h-t))*cos(i/44),e=y/9-14)/1.6)=>px=(d*9+k*k)*cos(c=d-t/2); py=(55+d*9)*sin(c/3)+4*sin(k*2)+(y/29)*k*(e+3*sin(e*4-d*4+t*3))",
         math: (i, t, h, N) => {
           const y = i / (N / 28.3);
@@ -260,6 +287,7 @@
       },
       atolla: {
         tag: "Crimson Bioluminescent Medusa-Fish",
+        audio: { baseFreq: 65, wave: 'triangle', modRatio: 2.0, type: 'pulse' },
         formula: "a=(y,d=mag(k=(11+5*cos(y*h*0.08-t*1.5))*sin(i/25),e=y/8-14)/1.4)=>px=(d*9.5+finRipple*5+bodyEnv*6)*cos(c)...",
         math: (i, t, h, N) => {
           const y = i / (N / 30.0);
@@ -276,6 +304,7 @@
       },
       stauromedusae: {
         tag: "Eight-Fold Fluid Stalked Medusa",
+        audio: { baseFreq: 48, wave: 'sine', modRatio: 4.0, type: 'octo' },
         formula: "a=(y,d=mag(k=(9+6*octoPhase*envelope+cos(y*h*0.05-t))*cos(i/31)...",
         math: (i, t, h, N) => {
           const y = i / (N / 28.0);
@@ -292,6 +321,7 @@
       },
       ctenophora: {
         tag: "Iridescent Comb Jelly Envelope",
+        audio: { baseFreq: 110, wave: 'sawtooth', modRatio: 0.5, type: 'shimmer' },
         formula: "a=(y,d=mag(k=(10+3*rib+bodyCurve*5)*sin(i/20),e=y/7.5-15)/1.6)...",
         math: (i, t, h, N) => {
           const y = i / (N / 32.0);
@@ -308,7 +338,8 @@
       },
       pelagia: {
         tag: "Verrucose Surface Turbulence",
-        formula: "a=(y,d=mag(k=(7+6*cos(y*h*0.1-t*1.2))*cos(i/52),e=y/9-13)/1.35)=>px=(d*10+k*sin(k))*cos(c=d-t*0.7)+sin(y*15)*4; py=(50+d*9)*sin(c/2.8)+5*cos(k*3)+(y/26)*k*(e*0.8+2.5*cos(e*4-d*3.5+t*2))",
+        audio: { baseFreq: 50, wave: 'square', modRatio: 1.33, type: 'rough' },
+        formula: "a=(y,d=mag(k=(7+6*cos(y*h*0.1-t*1.2))*cos(i/52),e=y/9-13)/1.35)...",
         math: (i, t, h, N) => {
           const y = i / (N / 29.0);
           const k = (7 + 6 * Math.cos(y * (h * 0.1) - t * 1.2)) * Math.cos(i / 52);
@@ -322,7 +353,8 @@
       },
       siphonophore: {
         tag: "Colonial Spiral Filament Coupling",
-        formula: "a=(y,d=mag(k=(14+8*cos(y*h*0.05-t*1.8))*sin(i/37),e=y/11-11)/2.0)=>px=(d*14+10*sin(c=d*1.5-t))*cos(c/1.5+y/5); py=(30+d*12)*sin(c/2)+9*sin(k*1.5)+(y/18)*k*sin(e*2.5-d*6+t*3)",
+        audio: { baseFreq: 73.4, wave: 'sine', modRatio: 3.14, type: 'glass' },
+        formula: "a=(y,d=mag(k=(14+8*cos(y*h*0.05-t*1.8))*sin(i/37),e=y/11-11)/2.0)...",
         math: (i, t, h, N) => {
           const y = i / (N / 38.0);
           const k = (14 + 8 * Math.cos(y * (h * 0.05) - t * 1.8)) * Math.sin(i / 37);
@@ -336,7 +368,8 @@
       },
       chrysaora: {
         tag: "Multi-Harmonic Cap Ripple Field",
-        formula: "a=(y,d=mag(k=(9+7*cos(y*h*0.1-t*1.4))*cos(i/41),e=y/8.5-14.5)/1.5)=>px=(d*9.5+k*k*0.2)*cos(c=d-t*0.9+cos(y*3)*0.5); py=(58+d*8.5)*sin(c/3.1)+7*sin(k*2.2)+(y/28)*k*(e+3.2*sin(e*3.8-d*4.2+t*2.8))",
+        audio: { baseFreq: 82.4, wave: 'triangle', modRatio: 1.5, type: 'ripple' },
+        formula: "a=(y,d=mag(k=(9+7*cos(y*h*0.1-t*1.4))*cos(i/41)...",
         math: (i, t, h, N) => {
           const y = i / (N / 30.0);
           const k = (9 + 7 * Math.cos(y * (h * 0.1) - t * 1.4)) * Math.cos(i / 41);
@@ -350,7 +383,8 @@
       },
       phronima: {
         tag: "Carapace Tensor Lattice",
-        formula: "a=(y,d=mag(k=(6+8*sin(y*h*0.1-t*1.6))*sin(i/29),e=y/9.5-12)/1.25)=>px=(d*11+5*cos(k*4))*cos(c=d*0.9-t*1.1); py=(45+d*10.5)*cos(c/2.6)+6*sin(k*3)+(y/24)*k*(e*1.1+2.8*sin(e*4.5-d*3.8+t*2.2))",
+        audio: { baseFreq: 98.0, wave: 'square', modRatio: 2.25, type: 'tensor' },
+        formula: "a=(y,d=mag(k=(6+8*sin(y*h*0.1-t*1.6))*sin(i/29)...",
         math: (i, t, h, N) => {
           const y = i / (N / 27.0);
           const k = (6 + 8 * Math.sin(y * (h * 0.1) - t * 1.6)) * Math.sin(i / 29);
@@ -364,7 +398,8 @@
       },
       velella: {
         tag: "Elliptical Shell & Diagonal Sail Field",
-        formula: "a=(y,d=mag(k=(11+4*cos(y*h*0.08-t*0.8))*cos(i/48),e=y/8-15)/1.7)=>px=(d*13+k*2)*cos(c=d-t*0.6+y*0.1); py=(65+d*6.5)*sin(c/3.5)+3*sin(k*2.8)+(y/32)*k*(e+2.2*cos(e*3-d*5+t*1.8))",
+        audio: { baseFreq: 61.7, wave: 'sine', modRatio: 1.61, type: 'sail' },
+        formula: "a=(y,d=mag(k=(11+4*cos(y*h*0.08-t*0.8))*cos(i/48)...",
         math: (i, t, h, N) => {
           const y = i / (N / 31.0);
           const k = (11 + 4 * Math.cos(y * (h * 0.08) - t * 0.8)) * Math.cos(i / 48);
@@ -378,7 +413,8 @@
       },
       bathykorus: {
         tag: "Quadrangular Shield Resonance",
-        formula: "a=(y,d=mag(k=(15+5*cos(y*h*0.09-t*1.3))*sin(i/46),e=y/10-13.5)/1.45)=>px=(d*10.5+k*k*0.25)*cos(c=d-t)+sin(k*3)*5; py=(48+d*9.2)*sin(c/2.9)+5*sin(k*2.1)+(y/27)*k*(e+3.5*sin(e*3.5-d*4.5+t*2.7))",
+        audio: { baseFreq: 43.6, wave: 'triangle', modRatio: 2.0, type: 'deep' },
+        formula: "a=(y,d=mag(k=(15+5*cos(y*h*0.09-t*1.3))*sin(i/46)...",
         math: (i, t, h, N) => {
           const y = i / (N / 33.0);
           const k = (15 + 5 * Math.cos(y * (h * 0.09) - t * 1.3)) * Math.sin(i / 46);
@@ -392,7 +428,8 @@
       },
       vortex_medusa: {
         tag: "Logarithmic Polar Vortex Surface",
-        formula: "a=(y,d=mag(k=(8+9*sin(y*h*0.06-t*2.2))*cos(i/35),e=y/7.5-16)/1.9)=>px=(d*7+k*k*0.4)*cos(c=d*1.4-t*1.2+y*0.2); py=(75+d*8)*sin(c/3.8)+8*cos(k*1.6)+(y/31)*k*sin(e*4-d*3+t*3.5)",
+        audio: { baseFreq: 77.8, wave: 'sawtooth', modRatio: 3.0, type: 'vortex' },
+        formula: "a=(y,d=mag(k=(8+9*sin(y*h*0.06-t*2.2))*cos(i/35)...",
         math: (i, t, h, N) => {
           const y = i / (N / 34.0);
           const k = (8 + 9 * Math.sin(y * (h * 0.06) - t * 2.2)) * Math.cos(i / 35);
@@ -406,7 +443,8 @@
       },
       architeuthis: {
         tag: "Sharp Hydrodynamic Squid Jet Propulsion",
-        formula: "a=(y,d=mag(k=(mantleWidth+4*sin(y*h*0.08-t*2.2))*sin(i/42),e=y/9.5-14)/1.35)=>px=(d*10.5+mantleWidth*0.8)*cos(c)...",
+        audio: { baseFreq: 36.7, wave: 'sawtooth', modRatio: 1.2, type: 'jet' },
+        formula: "a=(y,d=mag(k=(mantleWidth+4*sin(y*h*0.08-t*2.2))*sin(i/42)...",
         math: (i, t, h, N) => {
           const y = i / (N / 36.0);
           const jetPulse = Math.pow(Math.max(0, Math.sin(t * 2.2)), 3) * 1.6;
@@ -423,15 +461,20 @@
     };
 
     function resizeCanvas() {
-      const rect = canvas.getBoundingClientRect();
+      const rect = displayContainer.getBoundingClientRect();
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      
       canvas.width = rect.width * dpr;
       canvas.height = rect.height * dpr;
       ctx.resetTransform();
       ctx.scale(dpr, dpr);
+
+      captureCanvas.width = canvas.width;
+      captureCanvas.height = canvas.height;
+      captureCtx.resetTransform();
+      captureCtx.scale(dpr, dpr);
     }
     window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
 
     const btnCanvas = document.getElementById('mode-canvas');
     const btnRibbon = document.getElementById('mode-ribbon');
@@ -494,6 +537,7 @@
       const p = presets[state.preset];
       equationText.textContent = p.formula;
       formulaTag.textContent = p.tag;
+      if (state.audioActive) reconfigureAudioPreset();
     });
 
     themeSelect.addEventListener('change', (e) => {
@@ -506,7 +550,7 @@
     };
 
     const moveDrag = (clientX, clientY) => {
-      const rect = viewportMain.getBoundingClientRect();
+      const rect = displayContainer.getBoundingClientRect();
       state.mouse.targetX = clientX - (rect.left + rect.width / 2);
       state.mouse.targetY = clientY - (rect.top + rect.height / 2);
 
@@ -520,13 +564,11 @@
       state.isDragging = false;
     };
 
-    // Mouse listeners on Viewport Main
-    viewportMain.addEventListener('mousedown', (e) => startDrag(e.clientX, e.clientY));
+    displayContainer.addEventListener('mousedown', (e) => startDrag(e.clientX, e.clientY));
     window.addEventListener('mousemove', (e) => moveDrag(e.clientX, e.clientY));
     window.addEventListener('mouseup', stopDrag);
 
-    // Touch listeners
-    viewportMain.addEventListener('touchstart', (e) => {
+    displayContainer.addEventListener('touchstart', (e) => {
       if (e.touches.length === 1) startDrag(e.touches[0].clientX, e.touches[0].clientY);
     }, { passive: true });
 
@@ -536,8 +578,7 @@
 
     window.addEventListener('touchend', stopDrag);
 
-    // Mouse wheel zoom
-    viewportMain.addEventListener('wheel', (e) => {
+    displayContainer.addEventListener('wheel', (e) => {
       e.preventDefault();
       const zoomFactor = e.deltaY < 0 ? 1.12 : 0.88;
       updateZoom(state.zoom * zoomFactor);
@@ -548,133 +589,145 @@
 
       if (theme === 'thermal') {
         const t = Math.max(0, Math.min(1, fieldVal * 1.1));
-        if (t > 0.75) {
-          const r = (t - 0.75) / 0.25;
-          return `rgba(255, ${Math.floor(200 + 55 * r)}, ${Math.floor(100 * r)}, 0.85)`;
-        } else if (t > 0.45) {
-          const r = (t - 0.45) / 0.30;
-          return `rgba(255, ${Math.floor(80 + 120 * r)}, 20, 0.80)`;
-        } else if (t > 0.20) {
-          const r = (t - 0.20) / 0.25;
-          return `rgba(${Math.floor(140 + 115 * r)}, 20, ${Math.floor(80 - 60 * r)}, 0.75)`;
-        } else {
-          const r = t / 0.20;
-          return `rgba(${Math.floor(70 + 70 * r)}, ${Math.floor(10 * r)}, ${Math.floor(130 - 50 * r)}, 0.60)`;
-        }
+        if (t > 0.75) return `rgba(255, ${Math.floor(200 + 55 * ((t - 0.75) / 0.25))}, ${Math.floor(100 * ((t - 0.75) / 0.25))}, 0.85)`;
+        else if (t > 0.45) return `rgba(255, ${Math.floor(80 + 120 * ((t - 0.45) / 0.30))}, 20, 0.80)`;
+        else if (t > 0.20) return `rgba(${Math.floor(140 + 115 * ((t - 0.20) / 0.25))}, 20, ${Math.floor(80 - 60 * ((t - 0.20) / 0.25))}, 0.75)`;
+        else return `rgba(${Math.floor(70 + 70 * (t / 0.20))}, ${Math.floor(10 * (t / 0.20))}, ${Math.floor(130 - 50 * (t / 0.20))}, 0.60)`;
       } else if (theme === 'abyssal') {
         const t = Math.max(0, Math.min(1, fieldVal));
-        if (t > 0.7) {
-          const r = (t - 0.7) / 0.3;
-          return `rgba(${Math.floor(180 + 75 * r)}, 255, 255, 0.88)`;
-        } else if (t > 0.35) {
-          const r = (t - 0.35) / 0.35;
-          return `rgba(0, ${Math.floor(180 + 75 * r)}, ${Math.floor(200 + 55 * r)}, 0.80)`;
-        } else {
-          const r = t / 0.35;
-          return `rgba(${Math.floor(20 + 40 * r)}, ${Math.floor(40 + 100 * r)}, ${Math.floor(120 + 100 * r)}, 0.65)`;
-        }
+        if (t > 0.7) return `rgba(${Math.floor(180 + 75 * ((t - 0.7) / 0.3))}, 255, 255, 0.88)`;
+        else if (t > 0.35) return `rgba(0, ${Math.floor(180 + 75 * ((t - 0.35) / 0.35))}, ${Math.floor(200 + 55 * ((t - 0.35) / 0.35))}, 0.80)`;
+        else return `rgba(${Math.floor(20 + 40 * (t / 0.35))}, ${Math.floor(40 + 100 * (t / 0.35))}, ${Math.floor(120 + 100 * (t / 0.35))}, 0.65)`;
       } else if (theme === 'emerald') {
         const t = Math.max(0, Math.min(1, fieldVal));
-        if (t > 0.65) {
-          const r = (t - 0.65) / 0.35;
-          return `rgba(${Math.floor(160 + 95 * r)}, 255, ${Math.floor(100 + 100 * r)}, 0.85)`;
-        } else if (t > 0.3) {
-          const r = (t - 0.3) / 0.35;
-          return `rgba(16, ${Math.floor(180 + 70 * r)}, ${Math.floor(120 + 80 * r)}, 0.78)`;
-        } else {
-          const r = t / 0.3;
-          return `rgba(5, ${Math.floor(80 + 90 * r)}, ${Math.floor(60 + 50 * r)}, 0.60)`;
-        }
+        if (t > 0.65) return `rgba(${Math.floor(160 + 95 * ((t - 0.65) / 0.35))}, 255, ${Math.floor(100 + 100 * ((t - 0.65) / 0.35))}, 0.85)`;
+        else if (t > 0.3) return `rgba(16, ${Math.floor(180 + 70 * ((t - 0.3) / 0.35))}, ${Math.floor(120 + 80 * ((t - 0.3) / 0.35))}, 0.78)`;
+        else return `rgba(5, ${Math.floor(80 + 90 * (t / 0.3))}, ${Math.floor(60 + 50 * (t / 0.3))}, 0.60)`;
       } else if (theme === 'solar') {
         const t = Math.max(0, Math.min(1, fieldVal));
-        if (t > 0.7) {
-          const r = (t - 0.7) / 0.3;
-          return `rgba(255, ${Math.floor(220 + 35 * r)}, ${Math.floor(80 + 120 * r)}, 0.88)`;
-        } else if (t > 0.35) {
-          const r = (t - 0.35) / 0.35;
-          return `rgba(${Math.floor(220 + 35 * r)}, ${Math.floor(20 + 120 * r)}, ${Math.floor(120 + 60 * r)}, 0.80)`;
-        } else {
-          const r = t / 0.35;
-          return `rgba(${Math.floor(100 + 120 * r)}, 10, ${Math.floor(80 + 50 * r)}, 0.65)`;
-        }
+        if (t > 0.7) return `rgba(255, ${Math.floor(220 + 35 * ((t - 0.7) / 0.3))}, ${Math.floor(80 + 120 * ((t - 0.7) / 0.3))}, 0.88)`;
+        else if (t > 0.35) return `rgba(${Math.floor(220 + 35 * ((t - 0.35) / 0.35))}, ${Math.floor(20 + 120 * ((t - 0.35) / 0.35))}, ${Math.floor(120 + 60 * ((t - 0.35) / 0.35))}, 0.80)`;
+        else return `rgba(${Math.floor(100 + 120 * (t / 0.35))}, 10, ${Math.floor(80 + 50 * (t / 0.35))}, 0.65)`;
       } else if (theme === 'monochrome') {
         const t = Math.max(0, Math.min(1, fieldVal));
         const lum = Math.floor(40 + t * 215);
         return `rgba(${lum}, ${lum}, ${lum + Math.floor(t * 30)}, 0.80)`;
       } else {
         const t = Math.max(0, Math.min(1, fieldVal));
-        if (t > 0.7) {
-          const r = (t - 0.7) / 0.3;
-          return `rgba(255, ${Math.floor(210 + 45 * r)}, ${Math.floor(60 * r)}, 0.88)`;
-        } else if (t > 0.35) {
-          const r = (t - 0.35) / 0.35;
-          return `rgba(255, ${Math.floor(40 + 120 * r)}, ${Math.floor(100 + 80 * r)}, 0.80)`;
-        } else {
-          const r = t / 0.35;
-          return `rgba(${Math.floor(40 + 160 * r)}, 20, ${Math.floor(120 + 80 * r)}, 0.65)`;
-        }
+        if (t > 0.7) return `rgba(255, ${Math.floor(210 + 45 * ((t - 0.7) / 0.3))}, ${Math.floor(60 * ((t - 0.7) / 0.3))}, 0.88)`;
+        else if (t > 0.35) return `rgba(255, ${Math.floor(40 + 120 * ((t - 0.35) / 0.35))}, ${Math.floor(100 + 80 * ((t - 0.35) / 0.35))}, 0.80)`;
+        else return `rgba(${Math.floor(40 + 160 * (t / 0.35))}, 20, ${Math.floor(120 + 80 * (t / 0.35))}, 0.65)`;
       }
     }
 
+    // ASCII ENGINE PLEIN ÉCRAN DYNAMIQUE
     const ASCII_RAMP = " .':;ilwW#@█";
-    const ASCII_COLS = 120;
-    const ASCII_ROWS = 56;
-    const asciiGrid = Array(ASCII_ROWS).fill(0).map(() => new Float32Array(ASCII_COLS));
+    let ASCII_COLS = 120;
+    let ASCII_ROWS = 65;
+    let asciiGrid = [];
+
+    function initAsciiGrid() {
+      asciiGrid = Array(ASCII_ROWS).fill(0).map(() => 
+        Array(ASCII_COLS).fill(0).map(() => ({ val: 0, pt: null }))
+      );
+    }
+    initAsciiGrid();
 
     function renderASCII(points) {
-      for (let r = 0; r < ASCII_ROWS; r++) asciiGrid[r].fill(0);
+      const containerWidth = displayContainer.clientWidth;
+      const containerHeight = displayContainer.clientHeight;
+
+      // Calcul dynamique de la taille de police pour remplir tout le conteneur
+      const fontSize = Math.max(5, containerHeight / ASCII_ROWS * 1.05);
+      asciiViewport.style.fontSize = `${fontSize}px`;
+      asciiViewport.style.lineHeight = '1';
+
+      for (let r = 0; r < ASCII_ROWS; r++) {
+        for (let c = 0; c < ASCII_COLS; c++) {
+          asciiGrid[r][c].val = 0;
+          asciiGrid[r][c].pt = null;
+        }
+      }
 
       const halfW = ASCII_COLS / 2;
       const halfH = ASCII_ROWS / 2;
-      const scaleX = (ASCII_COLS / (400 / state.zoom));
-      const scaleY = (ASCII_ROWS / (400 / state.zoom));
+      
+      const aspectCorrection = 0.5; 
+      const fieldScale = (ASCII_COLS / 280) * state.zoom;
+
       const step = Math.max(1, Math.floor(points.length / 18000));
 
       for (let i = 0; i < points.length; i += step) {
         const pt = points[i];
-        const gridX = Math.floor((pt.x + state.pan.x * 0.4) * scaleX + halfW);
-        const gridY = Math.floor((pt.y + state.pan.y * 0.4) * scaleY + halfH);
+        const gridX = Math.floor((pt.x + state.pan.x * 0.3) * fieldScale + halfW);
+        const gridY = Math.floor((pt.y + state.pan.y * 0.3) * fieldScale * aspectCorrection + halfH);
 
         if (gridX >= 0 && gridX < ASCII_COLS && gridY >= 0 && gridY < ASCII_ROWS) {
-          asciiGrid[gridY][gridX] += 1.0;
+          asciiGrid[gridY][gridX].val += 1.0;
+          if (!asciiGrid[gridY][gridX].pt) {
+            asciiGrid[gridY][gridX].pt = pt;
+          }
         }
       }
 
-      let output = "";
+      let htmlOutput = "";
       for (let r = 0; r < ASCII_ROWS; r++) {
+        let line = "";
         for (let c = 0; c < ASCII_COLS; c++) {
-          const val = asciiGrid[r][c];
-          const normVal = Math.min(1.0, Math.log1p(val) / 2.2);
-          const charIdx = Math.floor(normVal * (ASCII_RAMP.length - 1));
-          output += ASCII_RAMP[charIdx];
+          const cell = asciiGrid[r][c];
+          if (cell.val === 0 || !cell.pt) {
+            line += " ";
+          } else {
+            const normVal = Math.min(1.0, Math.log1p(cell.val) / 2.2);
+            const charIdx = Math.floor(normVal * (ASCII_RAMP.length - 1));
+            const char = ASCII_RAMP[charIdx];
+            const color = getNodeColor(cell.pt, state.theme);
+            line += `<span style="color:${color}">${char}</span>`;
+          }
         }
-        output += "\n";
+        htmlOutput += line + "\n";
       }
 
-      asciiViewport.textContent = output;
-      asciiViewport.className = "font-mono text-[7px] sm:text-[8px] leading-[0.78] tracking-tighter text-cyan-300 select-none text-center whitespace-pre glow-cyan";
+      asciiViewport.innerHTML = htmlOutput;
     }
 
     const btnRecord = document.getElementById('btn-record');
     const recordDot = document.getElementById('record-dot');
     const recordText = document.getElementById('record-text');
     const recordStatus = document.getElementById('record-status');
+    const recordFormatSelect = document.getElementById('record-format');
+    const recordBitrateSelect = document.getElementById('record-bitrate');
 
     btnRecord.addEventListener('click', () => {
       if (!state.isRecording) startRecording();
       else stopRecording();
     });
 
+    function getSupportedMimeType(formatChoice) {
+      if (formatChoice === 'mp4') {
+        const types = ['video/mp4;codecs=avc1.42E01E,mp4a.40.2', 'video/mp4', 'video/webm;codecs=h264'];
+        for (let t of types) { if (MediaRecorder.isTypeSupported(t)) return t; }
+      } else if (formatChoice === 'webm-vp9') {
+        if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9')) return 'video/webm;codecs=vp9';
+      }
+      return 'video/webm';
+    }
+
     function startRecording() {
       try {
-        const stream = canvas.captureStream(30);
-        let mimeType = 'video/webm;codecs=vp9';
-        if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm';
+        const stream = captureCanvas.captureStream(60);
+        const formatChoice = recordFormatSelect.value;
+        const selectedMime = getSupportedMimeType(formatChoice);
+        const bitrate = parseInt(recordBitrateSelect.value);
 
         state.recordedChunks = [];
-        state.mediaRecorder = new MediaRecorder(stream, { mimeType });
+        state.mediaRecorder = new MediaRecorder(stream, { 
+          mimeType: selectedMime,
+          videoBitsPerSecond: bitrate 
+        });
+
         state.mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) state.recordedChunks.push(e.data); };
-        state.mediaRecorder.onstop = exportVideo;
+        state.mediaRecorder.onstop = () => exportVideo(formatChoice);
 
         state.mediaRecorder.start(100);
         state.isRecording = true;
@@ -682,14 +735,14 @@
 
         recordDot.classList.add('animate-ping');
         btnRecord.className = "w-full py-2 px-3 rounded-lg text-xs font-mono font-semibold border border-red-500 bg-red-600 text-white flex items-center justify-center space-x-2 transition-all";
-        recordText.textContent = "Stop Recording";
+        recordText.textContent = "Arrêter l'enregistrement";
 
         state.recordTimer = setInterval(() => {
           const elapsed = Math.floor((Date.now() - state.recordStartTime) / 1000);
-          recordStatus.textContent = `Recording... ${elapsed}s`;
+          recordStatus.textContent = `Enregistrement en cours... ${elapsed}s`;
         }, 1000);
       } catch (err) {
-        recordStatus.textContent = "Recording unsupported on browser.";
+        recordStatus.textContent = "Format non supporté sur ce navigateur.";
       }
     }
 
@@ -701,58 +754,150 @@
 
         recordDot.classList.remove('animate-ping');
         btnRecord.className = "w-full py-2 px-3 rounded-lg text-xs font-mono font-semibold border border-red-500/40 bg-red-950/20 text-red-300 hover:bg-red-900/40 flex items-center justify-center space-x-2 transition-all";
-        recordText.textContent = "Record Video (MP4/WebM)";
-        recordStatus.textContent = "Processing download...";
+        recordText.textContent = "Enregistrer la vidéo";
+        recordStatus.textContent = "Traitement du téléchargement...";
       }
     }
 
-    function exportVideo() {
-      const blob = new Blob(state.recordedChunks, { type: 'video/webm' });
+    function exportVideo(formatChoice) {
+      const ext = formatChoice.startsWith('mp4') ? 'mp4' : 'webm';
+      const blob = new Blob(state.recordedChunks, { type: state.mediaRecorder.mimeType });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.style.display = 'none';
       a.href = url;
-      a.download = `abyssos_${state.preset}_${Date.now()}.webm`;
+      a.download = `abyssos_${state.preset}_${Date.now()}.${ext}`;
       document.body.appendChild(a);
       a.click();
       setTimeout(() => {
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
-        recordStatus.textContent = "Export downloaded successfully!";
+        recordStatus.textContent = "Exportation téléchargée !";
       }, 100);
     }
 
-    let audioCtx = null, osc1 = null, osc2 = null, audioGain = null;
+    let audioCtx = null, carrierOsc = null, modulatorOsc = null, subOsc = null;
+    let filterNode = null, modGain = null, masterGain = null, lfoOsc = null;
+
+    function initAudioEngine() {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+      carrierOsc = audioCtx.createOscillator();
+      modulatorOsc = audioCtx.createOscillator();
+      subOsc = audioCtx.createOscillator();
+      lfoOsc = audioCtx.createOscillator();
+
+      filterNode = audioCtx.createBiquadFilter();
+      modGain = audioCtx.createGain();
+      masterGain = audioCtx.createGain();
+
+      lfoOsc.frequency.setValueAtTime(0.2, audioCtx.currentTime);
+      lfoOsc.type = 'sine';
+
+      filterNode.type = 'lowpass';
+      filterNode.Q.setValueAtTime(4.0, audioCtx.currentTime);
+
+      masterGain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+
+      modulatorOsc.connect(modGain);
+      modGain.connect(carrierOsc.frequency);
+
+      carrierOsc.connect(filterNode);
+      subOsc.connect(filterNode);
+
+      filterNode.connect(masterGain);
+      masterGain.connect(audioCtx.destination);
+
+      carrierOsc.start();
+      modulatorOsc.start();
+      subOsc.start();
+      lfoOsc.start();
+
+      reconfigureAudioPreset();
+    }
+
+    function reconfigureAudioPreset() {
+      if (!audioCtx) return;
+      const spec = presets[state.preset].audio;
+      const now = audioCtx.currentTime;
+
+      carrierOsc.type = spec.wave;
+      subOsc.type = 'sine';
+      modulatorOsc.type = 'sine';
+
+      carrierOsc.frequency.setTargetAtTime(spec.baseFreq, now, 0.2);
+      subOsc.frequency.setTargetAtTime(spec.baseFreq * 0.5, now, 0.2);
+      modulatorOsc.frequency.setTargetAtTime(spec.baseFreq * spec.modRatio, now, 0.2);
+      modGain.gain.setTargetAtTime(spec.baseFreq * 0.8, now, 0.2);
+    }
+
     document.getElementById('audio-toggle').addEventListener('click', () => {
       if (!state.audioActive) {
-        if (!audioCtx) {
-          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-          osc1 = audioCtx.createOscillator();
-          osc2 = audioCtx.createOscillator();
-          audioGain = audioCtx.createGain();
-
-          osc1.type = 'sine';
-          osc1.frequency.setValueAtTime(55, audioCtx.currentTime);
-          osc2.type = 'triangle';
-          osc2.frequency.setValueAtTime(110, audioCtx.currentTime);
-
-          audioGain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-          osc1.connect(audioGain);
-          osc2.connect(audioGain);
-          audioGain.connect(audioCtx.destination);
-          osc1.start();
-          osc2.start();
-        } else {
-          audioCtx.resume();
-        }
+        if (!audioCtx) initAudioEngine();
+        else audioCtx.resume();
         state.audioActive = true;
-        document.getElementById('audio-text').textContent = "Mute Drone Synthesizer";
+        document.getElementById('audio-text').textContent = "Couper le Synthétiseur Ambient";
       } else {
         if (audioCtx) audioCtx.suspend();
         state.audioActive = false;
-        document.getElementById('audio-text').textContent = "Enable Low Drone Synthesizer";
+        document.getElementById('audio-text').textContent = "Activer Synthétiseur Ambient Bio-Évolutif";
       }
     });
+
+    function updateAudioParameters(motionEnergy) {
+      if (state.audioActive && audioCtx && filterNode) {
+        const spec = presets[state.preset].audio;
+        const now = audioCtx.currentTime;
+
+        const dynamicPitch = spec.baseFreq + Math.sin(state.t * 0.8) * 12 + (motionEnergy * 0.4);
+        const filterCutoff = 120 + (motionEnergy * 15) + (state.harmonics * 4) + Math.sin(state.t * 1.5) * 80;
+
+        carrierOsc.frequency.setTargetAtTime(Math.max(30, dynamicPitch), now, 0.08);
+        filterNode.frequency.setTargetAtTime(Math.max(80, filterCutoff), now, 0.08);
+        modGain.gain.setTargetAtTime(spec.baseFreq * (0.5 + Math.sin(state.t) * 0.4), now, 0.1);
+      }
+    }
+
+    function drawCanvasContent(targetCtx, points, displayWidth, displayHeight, centerX, centerY, mode) {
+      targetCtx.fillStyle = '#000000';
+      targetCtx.fillRect(0, 0, displayWidth, displayHeight);
+
+      if (mode === 'ribbon') {
+        targetCtx.lineWidth = Math.max(0.8, 1.2 * state.zoom);
+        const strandLength = 120;
+        for (let i = 0; i < points.length - 1; i += 2) {
+          if (i % strandLength === 0) continue;
+
+          const p1 = points[i];
+          const p2 = points[i + 1];
+
+          const x1 = p1.x * state.zoom + centerX;
+          const y1 = p1.y * state.zoom + centerY;
+          const x2 = p2.x * state.zoom + centerX;
+          const y2 = p2.y * state.zoom + centerY;
+
+          if (x1 < -50 || x1 > displayWidth + 50 || y1 < -50 || y1 > displayHeight + 50) continue;
+
+          targetCtx.strokeStyle = getNodeColor(p1, state.theme);
+          targetCtx.beginPath();
+          targetCtx.moveTo(x1, y1);
+          targetCtx.lineTo(x2, y2);
+          targetCtx.stroke();
+        }
+      } else {
+        const particleRadius = Math.max(0.6, Math.min(2.5, 1.0 * Math.sqrt(state.zoom)));
+        for (let i = 0; i < points.length; i++) {
+          const pt = points[i];
+          const px = pt.x * state.zoom + centerX;
+          const py = pt.y * state.zoom + centerY;
+
+          if (px < -10 || px > displayWidth + 10 || py < -10 || py > displayHeight + 10) continue;
+
+          targetCtx.fillStyle = getNodeColor(pt, state.theme);
+          targetCtx.fillRect(px - particleRadius * 0.5, py - particleRadius * 0.5, particleRadius, particleRadius);
+        }
+      }
+    }
 
     let lastTime = performance.now();
     let frameCount = 0;
@@ -769,7 +914,7 @@
       state.mouse.x += (state.mouse.targetX - state.mouse.x) * 0.05;
       state.mouse.y += (state.mouse.targetY - state.mouse.y) * 0.05;
 
-      const rect = canvas.getBoundingClientRect();
+      const rect = displayContainer.getBoundingClientRect();
       const displayWidth = rect.width;
       const displayHeight = rect.height;
 
@@ -779,54 +924,29 @@
       const currentPresetMath = presets[state.preset].math;
       const points = [];
 
+      let totalDist = 0;
+      const sampleStep = Math.floor(state.density / 200);
+
       for (let i = 0; i < state.density; i++) {
-        points.push(currentPresetMath(i, state.t, state.harmonics, state.density));
+        const pt = currentPresetMath(i, state.t, state.harmonics, state.density);
+        points.push(pt);
+
+        if (i % sampleStep === 0) {
+          totalDist += pt.d + Math.abs(pt.k);
+        }
       }
 
-      if (state.renderMode === 'canvas') {
-        ctx.fillStyle = '#000000';
-        ctx.fillRect(0, 0, displayWidth, displayHeight);
+      state.motionEnergy = (totalDist / (state.density / sampleStep)) * state.speed;
+      updateAudioParameters(state.motionEnergy);
 
-        const particleRadius = Math.max(0.6, Math.min(2.5, 1.0 * Math.sqrt(state.zoom)));
-
-        for (let i = 0; i < points.length; i++) {
-          const pt = points[i];
-          const px = pt.x * state.zoom + centerX;
-          const py = pt.y * state.zoom + centerY;
-
-          if (px < -10 || px > displayWidth + 10 || py < -10 || py > displayHeight + 10) continue;
-
-          ctx.fillStyle = getNodeColor(pt, state.theme);
-          ctx.fillRect(px - particleRadius * 0.5, py - particleRadius * 0.5, particleRadius, particleRadius);
-        }
-      } else if (state.renderMode === 'ribbon') {
-        ctx.fillStyle = '#000000';
-        ctx.fillRect(0, 0, displayWidth, displayHeight);
-        ctx.lineWidth = Math.max(0.8, 1.2 * state.zoom);
-
-        const strandLength = 120;
-        for (let i = 0; i < points.length - 1; i += 2) {
-          if (i % strandLength === 0) continue;
-
-          const p1 = points[i];
-          const p2 = points[i + 1];
-
-          const x1 = p1.x * state.zoom + centerX;
-          const y1 = p1.y * state.zoom + centerY;
-          const x2 = p2.x * state.zoom + centerX;
-          const y2 = p2.y * state.zoom + centerY;
-
-          if (x1 < -50 || x1 > displayWidth + 50 || y1 < -50 || y1 > displayHeight + 50) continue;
-
-          ctx.strokeStyle = getNodeColor(p1, state.theme);
-          ctx.beginPath();
-          ctx.moveTo(x1, y1);
-          ctx.lineTo(x2, y2);
-          ctx.stroke();
-        }
+      if (state.renderMode !== 'ascii') {
+        drawCanvasContent(ctx, points, displayWidth, displayHeight, centerX, centerY, state.renderMode);
       } else {
         renderASCII(points);
       }
+
+      const captureMode = state.renderMode === 'ascii' ? 'canvas' : state.renderMode;
+      drawCanvasContent(captureCtx, points, displayWidth, displayHeight, centerX, centerY, captureMode);
 
       requestAnimationFrame(animate);
     }
